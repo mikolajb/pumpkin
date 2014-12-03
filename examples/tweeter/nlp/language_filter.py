@@ -31,7 +31,8 @@ import re, os, time
 import urllib2
 from random import randint
 from pumpkin import PmkSeed
-from language_detector import detect_language
+from nltk import wordpunct_tokenize
+from nltk.corpus import stopwords
 
 class topic_filter(PmkSeed.Seed):
 
@@ -42,9 +43,25 @@ class topic_filter(PmkSeed.Seed):
     def on_load(self):
         print "Loading: " + self.__class__.__name__
 
+    def detect_language(text):
+
+        words = [word.lower() for word in wordpunct_tokenize(text)]
+        result = (None, -1)
+
+        for language in stopwords.fileids():
+            stopwords_set = set(stopwords.words(language))
+            words_set = set(words)
+            common_elements = words_set.intersection(stopwords_set)
+            ratio = float(len(common_elements)) / len(stopwords_set)
+
+            if ratio > result[1]:
+                result = (language, ratio)
+
+        return result[0]
+
     def run(self, pkt, tweet):
         m = re.search('W(\s+)(.*)(\n)', tweet, re.S)
         if m:
             tw = m.group(2)
-            language = detect_language(tw)
+            language = self.detect_language(tw)
             self.dispatch(pkt, tweet, str.upper(language))
