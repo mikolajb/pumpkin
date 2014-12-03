@@ -1,6 +1,6 @@
 ###START-CONF
 ##{
-##"object_name": "sentiment_analyses",
+##"object_name": "topic_filter",
 ##"object_poi": "qpwo-2345",
 ##"auto-load": true,
 ##"remoting" : true,
@@ -43,7 +43,7 @@ class topic_filter(PmkSeed.Seed):
 
     def on_load(self):
         print "Loading: " + self.__class__.__name__
-        url = "URL-TO-DATA-FILE"
+        url = "https://www.dropbox.com/s/qn6o8r3liq5jxv4/topic_detection_data.pickle?dl=1"
         file_name = self.wd+"topic_detection_data.pickle"
         self.get_net_file(url, file_name)
         self.td = TopicDetector(file_name)
@@ -79,11 +79,13 @@ class topic_filter(PmkSeed.Seed):
                 pass
 
     def run(self, pkt, tweet):
-        m = re.search('W(\s+)(.*)(\n)', tweet, re.S)
-        if m:
-            tw = m.group(2)
-            if self.td.is_topic('movies', tw):
-                self.dispatch(pkt, tweet, "MOVIE")
+        for t in tweet:
+            m = re.search('W(\s+)(.*)(\n)', t, re.S)
+            if m:
+                tw = m.group(2)
+                if self.td.is_topic('movies', tw):
+                    self.logger.info("topic_filter: topic found in " + tw)
+                    self.dispatch(pkt, t, "MOVIE")
 
 
 class TopicDetector:
@@ -123,7 +125,6 @@ class TopicDetector:
             None # todo: more topics than movies
 
         words = set([word.lower() for word in nltk.wordpunct_tokenize(text)])
-        print self.words
         inter = words.intersection(self.words)
-        print inter
         return len(inter) > 1
+

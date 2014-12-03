@@ -1,6 +1,6 @@
 ###START-CONF
 ##{
-##"object_name": "sentiment_analyses",
+##"object_name": "language_filter",
 ##"object_poi": "qpwo-2345",
 ##"auto-load": true,
 ##"remoting" : true,
@@ -11,7 +11,7 @@
 ##                      "required": true,
 ##                      "type": "TweetString",
 ##                      "format": "",
-##                      "state" : "ENGLISH"
+##                      "state" : "RAW"
 ##                  }
 ##              ],
 ##"return": [
@@ -21,11 +21,13 @@
 ##                      "required": true,
 ##                      "type": "TweetString",
 ##                      "format": "",
-##                      "state" : "DANISH|DUTCH|ENGLISH|FINNISH|FRENCH|GERMAN|HUNGARIAN|ITALIAN|NORWEGIAN|PORTUGUESE|RUSSIAN|SPANISH|SWEDISH|TURKISH"
+##                      "state" : "ENGLISH"
 ##                  }
 ##
 ##          ] }
 ##END-CONF
+
+# supports: DANISH|DUTCH|ENGLISH|FINNISH|FRENCH|GERMAN|HUNGARIAN|ITALIAN|NORWEGIAN|PORTUGUESE|RUSSIAN|SPANISH|SWEDISH|TURKISH
 
 import re, os, time
 import urllib2
@@ -34,7 +36,7 @@ from pumpkin import PmkSeed
 from nltk import wordpunct_tokenize
 from nltk.corpus import stopwords
 
-class topic_filter(PmkSeed.Seed):
+class language_filter(PmkSeed.Seed):
 
     def __init__(self, context, poi=None):
         PmkSeed.Seed.__init__(self, context,poi)
@@ -43,7 +45,7 @@ class topic_filter(PmkSeed.Seed):
     def on_load(self):
         print "Loading: " + self.__class__.__name__
 
-    def detect_language(text):
+    def detect_language(self, text):
 
         words = [word.lower() for word in wordpunct_tokenize(text)]
         result = (None, -1)
@@ -60,8 +62,12 @@ class topic_filter(PmkSeed.Seed):
         return result[0]
 
     def run(self, pkt, tweet):
-        m = re.search('W(\s+)(.*)(\n)', tweet, re.S)
-        if m:
-            tw = m.group(2)
-            language = self.detect_language(tw)
-            self.dispatch(pkt, tweet, str.upper(language))
+        for t in tweet:
+            m = re.search('W(\s+)(.*)(\n)', t, re.S)
+            if m:
+                tw = m.group(2)
+
+                if len(tw) > 10 and type(tw) == str:
+                    language = self.detect_language(tw)
+                    if language == 'english':
+                        self.dispatch(pkt, t, 'ENGLISH')

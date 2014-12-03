@@ -1,6 +1,6 @@
 ###START-CONF
 ##{
-##"object_name": "sentiment_analyses",
+##"object_name": "named_entity_filter",
 ##"object_poi": "qpwo-2345",
 ##"auto-load": true,
 ##"remoting" : true,
@@ -11,7 +11,7 @@
 ##                      "required": true,
 ##                      "type": "TweetString",
 ##                      "format": "",
-##                      "state" : "ENGLISH"
+##                      "state" : "MOVIE"
 ##                  }
 ##              ],
 ##"return": [
@@ -33,7 +33,7 @@ from random import randint
 from pumpkin import PmkSeed
 from nltk import sent_tokenize, word_tokenize, pos_tag, ne_chunk
 
-class topic_filter(PmkSeed.Seed):
+class named_entity_filter(PmkSeed.Seed):
 
     def __init__(self, context, poi=None):
         PmkSeed.Seed.__init__(self, context,poi)
@@ -42,7 +42,7 @@ class topic_filter(PmkSeed.Seed):
     def on_load(self):
         print "Loading: " + self.__class__.__name__
 
-    def extract_named_entities(text):
+    def extract_named_entities(self, text):
         sentences = sent_tokenize(text)
         sentences = [word_tokenize(sent) for sent in sentences]
         sentences = [pos_tag(sent) for sent in sentences]
@@ -53,9 +53,13 @@ class topic_filter(PmkSeed.Seed):
         return result
 
     def run(self, pkt, tweet):
-        m = re.search('W(\s+)(.*)(\n)', tweet, re.S)
-        if m:
-            tw = m.group(2)
-            entities = self.extract_named_entities(tw)
-            if len(entities) > 0:
-                self.dispatch(pkt, ",".join(entities), ENTITIES)
+        for t in tweet:
+            m = re.search('W(\s+)(.*)(\n)', t, re.S)
+            if m:
+                tw = m.group(2)
+                self.logger.info("named_entity_filter: " + tw)
+                entities = self.extract_named_entities(tw)
+                if len(entities) > 0:
+                    self.logger.info("named_entity_filter: |" + "| ".join(entities))
+                    self.dispatch(pkt, ", ".join(entities), 'ENTITIES')
+
