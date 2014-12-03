@@ -31,7 +31,7 @@ import re, os, time
 import urllib2
 from random import randint
 from pumpkin import PmkSeed
-from named_entity_extractor import extract_named_entities
+from nltk import sent_tokenize, word_tokenize, pos_tag, ne_chunk
 
 class topic_filter(PmkSeed.Seed):
 
@@ -42,10 +42,20 @@ class topic_filter(PmkSeed.Seed):
     def on_load(self):
         print "Loading: " + self.__class__.__name__
 
+    def extract_named_entities(text):
+        sentences = sent_tokenize(text)
+        sentences = [word_tokenize(sent) for sent in sentences]
+        sentences = [pos_tag(sent) for sent in sentences]
+        result = []
+        for sent in sentences:
+            result += [word[0] for word, tag in ne_chunk(sent, binary=True).pos()
+                       if tag == 'NE']
+        return result
+
     def run(self, pkt, tweet):
         m = re.search('W(\s+)(.*)(\n)', tweet, re.S)
         if m:
             tw = m.group(2)
-            entities = extract_named_entities(tw)
+            entities = self.extract_named_entities(tw)
             if len(entities) > 0:
                 self.dispatch(pkt, ",".join(entities), ENTITIES)
