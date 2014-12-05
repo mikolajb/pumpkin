@@ -11,7 +11,7 @@
 ##                      "required": true,
 ##                      "type": "TweetString",
 ##                      "format": "",
-##                      "state" : "MOVIE"
+##                      "state" : "POSITIVE"
 ##                  }
 ##              ],
 ##"return": [

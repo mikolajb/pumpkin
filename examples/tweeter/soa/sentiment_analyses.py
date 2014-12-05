@@ -11,7 +11,7 @@
 ##                      "required": true,
 ##                      "type": "TweetString",
 ##                      "format": "",
-##                      "state" : "ENGLISH"
+##                      "state" : "MOVIE"
 ##                  }
 ##              ],
 ##"return": [
@@ -21,7 +21,7 @@
 ##                      "required": true,
 ##                      "type": "TweetString",
 ##                      "format": "",
-##                      "state" : "POSITIVE|NEGATIVE"
+##                      "state" : "POSITIVE"
 ##                  }
 ##
 ##          ] }
@@ -100,5 +100,5 @@ class sentiment_analyses(PmkSeed.Seed):
             tw = m.group(2)
             if self.check(tw):
                self.dispatch(pkt, tweet, "POSITIVE")
-            else:
-               self.dispatch(pkt, tweet, "NEGATIVE")
+            # else:
+            #    self.dispatch(pkt, tweet, "NEGATIVE")
