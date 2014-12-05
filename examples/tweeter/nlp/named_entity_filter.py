@@ -53,13 +53,12 @@ class named_entity_filter(PmkSeed.Seed):
         return result
 
     def run(self, pkt, tweet):
-        for t in tweet:
-            m = re.search('W(\s+)(.*)(\n)', t, re.S)
-            if m:
-                tw = m.group(2)
-                self.logger.info("named_entity_filter: " + tw)
-                entities = self.extract_named_entities(tw)
-                if len(entities) > 0:
-                    self.logger.info("named_entity_filter: |" + "| ".join(entities))
-                    self.dispatch(pkt, ", ".join(entities), 'ENTITIES')
+        m = re.search('W(\s+)(.*)(\n)', tweet, re.S)
+        if m:
+            tw = m.group(2)
+            self.logger.info("named_entity_filter: " + tw)
+            entities = self.extract_named_entities(tw)
+            if len(entities) > 0:
+                self.logger.info("named_entity_filter: |" + "| ".join(entities))
+                self.dispatch(pkt, ", ".join(entities), 'ENTITIES')
 

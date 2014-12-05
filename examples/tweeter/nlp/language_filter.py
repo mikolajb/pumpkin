@@ -62,12 +62,10 @@ class language_filter(PmkSeed.Seed):
         return result[0]
 
     def run(self, pkt, tweet):
-        for t in tweet:
-            m = re.search('W(\s+)(.*)(\n)', t, re.S)
-            if m:
-                tw = m.group(2)
-
-                if len(tw) > 10 and type(tw) == str:
-                    language = self.detect_language(tw)
-                    if language == 'english':
-                        self.dispatch(pkt, t, 'ENGLISH')
+        m = re.search('W(\s+)(.*)(\n)', tweet, re.S)
+        if m:
+            tw = m.group(2)
+            if len(tw) > 10:
+                language = self.detect_language(tw)
+                if language == 'english':
+                    self.dispatch(pkt, tweet, 'ENGLISH')

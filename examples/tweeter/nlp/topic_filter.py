@@ -79,13 +79,12 @@ class topic_filter(PmkSeed.Seed):
                 pass
 
     def run(self, pkt, tweet):
-        for t in tweet:
-            m = re.search('W(\s+)(.*)(\n)', t, re.S)
-            if m:
-                tw = m.group(2)
-                if self.td.is_topic('movies', tw):
-                    self.logger.info("topic_filter: topic found in " + tw)
-                    self.dispatch(pkt, t, "MOVIE")
+        m = re.search('W(\s+)(.*)(\n)', tweet, re.S)
+        if m:
+            tw = m.group(2)
+            if self.td.is_topic('movies', tw):
+                self.logger.info("topic_filter: topic found in " + tw)
+                self.dispatch(pkt, tweet, "MOVIE")
 
 
 class TopicDetector:
